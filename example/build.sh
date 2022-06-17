@@ -4,7 +4,4 @@
 
 scriptdir=$(dirname $(readlink -f $0))
 
-docker build \
-	--build-arg DCKR_SCRTS_DEPLOY_TOKEN_USERNAME=${DCKR_SCRTS_DEPLOY_TOKEN_USERNAME} \
-	--build-arg DCKR_SCRTS_DEPLOY_TOKEN_PASSWORD=${DCKR_SCRTS_DEPLOY_TOKEN_PASSWORD} \
-	-t docker-secrets-deploy-example $scriptdir $1
+docker build -t docker-secrets-deploy-example $scriptdir $1
