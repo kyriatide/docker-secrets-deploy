@@ -72,12 +72,11 @@ class IniFileConfigHdl(FileConfigHdl):
     def __init__(self, config_id: str):
         super(IniFileConfigHdl, self).__init__(config_id)
 
-    def templatize(self, assignments: dict, assignment_op: str='=', allow_multi_occurance: bool=False) -> str:
+    def templatize(self, assignments: dict, assignment_op: str = '=', allow_multi_occurance: bool = False, **kwargs) -> str:
         """
         Creates a template from a specific configuration by replacing actual occurances of
         configuration variables values by templating keywords, i.e., corresponding environment variable names,
         which are enclosed in double curly braces starting with a dot before the keyword (like templating in Go).
-
         :param config: Configuration.
         :param assignments: A dict that maps configuration variable names (keys) to environment
             variable names (values).

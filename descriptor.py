@@ -28,7 +28,7 @@ class DeploymentDescriptor:
     :param assign: Describes which config variables to set to which values.
     :param persist: Whether to persist (store) the template (templatized from the configuration).
     """
-    def __init__(self, config: str=None, templatize: bool=True, assign: dict=None, persist: bool=False):
+    def __init__(self, config: str=None, templatize: bool=True, assign: dict=None, persist: bool=False, **kwargs):
         """
         Note that the parameters of this method follow the JSON serialization attribute names of deployment
         descriptors, which does not always align with the naming conventions used throghout the code.
@@ -57,6 +57,14 @@ class DeploymentDescriptor:
     def templatize(self):
         return self._templatize
 
+    def args(self) -> dict:
+        """
+        :return: Returns deployment descriptor attributes as dict, with keys named following coding conventions/names,
+            not serialization conventions/names.
+        """
+        return {'config_id': self.config_id(), 'templatize': self.templatize(),
+                'assignments': self.assignments(), 'persist': self.persist()}
+
     @classmethod
     def parse(cls, config_type: str=None, **kwargs) -> 'DeploymentDescriptor':
         """
@@ -84,7 +92,7 @@ class IniFileConfigDeploymentDescriptor(DeploymentDescriptor):
     """
     Describes the deployment of secrets/values into an ini configuration file.
     """
-    def __init__(self, assignment_op: chr='=',  **kwargs):
+    def __init__(self, assignment_op: chr = '=', allow_multi_occurance: bool = False, **kwargs):
         """
         Validates parameters specific to the configuration type, alongside instantiation via the superclass' constructor.
         :param assignment_op:
@@ -93,10 +101,21 @@ class IniFileConfigDeploymentDescriptor(DeploymentDescriptor):
         assert assignment_op in ['=', ':']
         self._assignment_op = assignment_op
 
+        self._allow_multi_occurance = allow_multi_occurance
+
         super(IniFileConfigDeploymentDescriptor, self).__init__(**kwargs)
 
     def assignment_op(self):
         return self._assignment_op
+
+    def allow_multi_occurance(self):
+        return self._allow_multi_occurance
+
+    def args(self):
+        return {
+            **super(IniFileConfigDeploymentDescriptor, self).args(),
+            **{'assignment_op': self.assignment_op(), 'allow_multi_occurance': self.allow_multi_occurance()}
+        }
 
 
 class Loader:

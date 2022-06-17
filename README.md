@@ -1,14 +1,16 @@
 # Deploying Secrets into Containers
 
 In almost every docker image you have configuration files containing variables that need to be set to the correct values 
-when the image is run as container. Sometimes the correct values can be determined and set at the time when the image is
-being built (at 'build time', e.g., with `docker build`), and sometimes the correct values can (or should) only be determined and set when the 
+when the image is run as container. Sometimes the correct values can be set at the time when the image is
+being built (at 'build time', e.g., with `docker build`), and sometimes the correct values can (or should) be set when the 
 container is being run (at 'runtime', e.g., with `docker run`).
 The latter applies for variables that e.g. differ depending on the runtime environment, like the development or production environment,
 but also for secrets, which you wouldn't want to build into the image but deploy or inject into the container at runtime.
 
 The proposed approach provides for setting variables in configuration files to environment variables passed to the 
-container at runtime in a lightweight, robust and simple manner.
+container at runtime in a lightweight, robust and simple manner. It builds on an extensible framework that allows to add
+support for new configuration types and secrets providers amongst others.
+
 Compared to manually maintaining templates and inserting secrets, the approach has the benefits of
 declarative specification, providing for always current configurations, and persistent configurations managed in git.
 
@@ -28,8 +30,10 @@ pwd  =
 then running the container, e.g., by
 
 ```
-docker run -e ENV_PASSWORD=bLupdLr4R2HY \
-           -e DCKR_SCRTS_DEPLOY='{"config": "/config/example.conf", "assign": {"pwd": "ENV_PASSWORD"}}' image
+docker run \
+    -e ENV_PASSWORD=bLupdLr4R2HY \
+    -e DCKR_SCRTS_DEPLOY='{"config": "/config/example.conf", "assign": {"pwd": "ENV_PASSWORD"}}' \
+    image
 ```
 
 results in the following changed configuration file `/config/example.conf` taking effect in the container:
@@ -142,7 +146,7 @@ so if there is no templatization, this attribute must be empty.
 For ini configuration files:
 * `assignment_op` (default: `=`): Defines the operator used in the config file to assign values to variables.
 * `allow_multi_occurance` (default: `false`): Check every variable occured only once in the configuration. Alleged
-multiple occurances usually indicate an error, e.g., caused by chosen variable name that is not unique.
+multiple occurances usually indicate an error, e.g., caused by a variable name that is not unique.
 
 # Extensibility
 
