@@ -1,0 +1,9 @@
+version: '3'
+services:
+  docker-secrets-deploy-example:
+    build: .
+    image: docker-secrets-deploy-example
+    container_name: docker-secrets-deploy-example
+    environment:
+      - 'DCKR_SCRTS_DEPLOY={"config": "/config/example.conf", "assign": {"pwd": "ENV_PASSWORD"}}'
+      - 'ENV_PASSWORD=bLupdLr4R2HY'
