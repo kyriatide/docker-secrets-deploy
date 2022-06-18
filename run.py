@@ -60,14 +60,13 @@ def cmd(args) -> int:
         sys.stdout.flush()
 
         # https://docs.python.org/3/library/subprocess.html#subprocess.Popen
-        _popen = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=0)
-
-        while _popen.poll() is None:
-            line = _popen.stdout.readline()
-            # if not line:
-            #     break
-            print(line.rstrip().decode(errors='backslashreplace'))
-            sys.stdout.flush()
+        with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=0) as _popen:
+            while _popen.poll() is None:
+                line = _popen.stdout.readline()
+                # if not line:
+                #     break
+                print(line.rstrip().decode(errors='backslashreplace'))
+                sys.stdout.flush()
 
         return _popen.returncode
 
