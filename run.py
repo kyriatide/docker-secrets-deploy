@@ -33,7 +33,7 @@ def deploy(loader_cls: dscr.Loader = dscr.EnvironLoader,
             # (a) derive template from configuration
             if not config_hdl.read():
                 raise ValueError('Configuration not found but required for templatization (as set by attribute \'templatize\').')
-            template = config_hdl.templatize(**desc.args())
+            template = config_hdl.templatize(desc)
         else:
             # (b) use template right away
             if not template_hdl.read():
@@ -64,8 +64,8 @@ def cmd(args) -> int:
 
         while _popen.poll() is None:
             line = _popen.stdout.readline()
-            if not line:
-                break
+            # if not line:
+            #     break
             print(line.rstrip().decode(errors='backslashreplace'))
             sys.stdout.flush()
 

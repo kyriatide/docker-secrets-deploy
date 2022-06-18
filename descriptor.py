@@ -11,9 +11,7 @@ Currently supported are loading: from environment variable (`EnvironLoader`).
 
 """
 
-import importlib
-import json, os
-import handler as tmpl
+import importlib, json, os, re, typing
 
 
 class DeploymentDescriptor:
@@ -36,12 +34,13 @@ class DeploymentDescriptor:
         :param assign: Variable assignments that shall be made in the referenced configuration.
         """
         # configuration-id is mandatory
-        assert config
+        assert config and isinstance(config, str)
+        self._config_id = config
+
         assert (templatize and assign is not None and len(assign) > 0) or \
                (not templatize and (assign is None or len(assign) == 0))
-
-        self._config_id = config
         self._templatize = templatize
+
         self._assignments = assign
         self._persist = persist
 
@@ -57,30 +56,24 @@ class DeploymentDescriptor:
     def templatize(self):
         return self._templatize
 
-    def args(self) -> dict:
-        """
-        :return: Returns deployment descriptor attributes as dict, with keys named following coding conventions/names,
-            not serialization conventions/names.
-        """
-        return {'config_id': self.config_id(), 'templatize': self.templatize(),
-                'assignments': self.assignments(), 'persist': self.persist()}
-
     @classmethod
     def parse(cls, config_type: str=None, **kwargs) -> 'DeploymentDescriptor':
         """
-        Parses a single deployment descriptor item represented by kwargs into a deployment descriptor instance of the
-        according class.
+        Parses a single deployment descriptor represented by kwargs into a deployment descriptor object of the
+        correct class.
         It uses the deployment descriptor to identify the respective configuration type. This is done either by
-        using the explicitly specified attribute config_type, or by deriving the type from the syntax of the config_id.
+        using the explicitly specified attribute config_type, or by identifying the type by the syntax of the config_id.
         """
         if config_type is not None:
             # config_type is explicitly specified
             dscr_cls = config_type + DeploymentDescriptor.__name__
         else:
-            # derive configuration type from configuration id
-            # todo: can further use filename extensions as indicators for correct config types
+            # identify configuration type by configuration id
             config_id = DeploymentDescriptor(**kwargs).config_id()
-            if tmpl.IniFileConfigHdl(config_id).validate():
+            # todo: identification rules to become more elaborate, e.g., use further indicators such as filename extensions
+            #  for correct identification of config type
+            # currently very basic, least specific rule: if it's a file, assume its an ini config files
+            if FileConfigDeploymentDescriptor.is_valid_config_id(config_id):
                 dscr_cls = IniFileConfigDeploymentDescriptor.__name__
             else:
                 raise ValueError('Configuration identifier \'{}\' is not supported.'.format(config_id))
@@ -88,19 +81,42 @@ class DeploymentDescriptor:
         return getattr(importlib.import_module('descriptor'), dscr_cls)(**kwargs)
 
 
-class IniFileConfigDeploymentDescriptor(DeploymentDescriptor):
+class FileConfigDeploymentDescriptor(DeploymentDescriptor):
+
+    def __init__(self, **kwargs):
+        super(FileConfigDeploymentDescriptor, self).__init__(**kwargs)
+
+    @classmethod
+    def is_valid_config_id(cls, config_id: str):
+        """
+        Only file URIs without host name and with absolute file paths are supported.
+        """""
+        VALID_FILEPATH_CHAR = '[A-z0-9-_+ \.]'
+        RE_ABSOLUTE_PATH = '^/({0}+\/)*({0}+(\.{0}*)?)$'.format(VALID_FILEPATH_CHAR)
+        FILE_URI_PREFIX = 'file://'
+
+        return ((config_id.find(FILE_URI_PREFIX) == 0) and
+                re.match(RE_ABSOLUTE_PATH, config_id[len(FILE_URI_PREFIX):])) or \
+               re.match(RE_ABSOLUTE_PATH, config_id)
+
+    # def validate(self):
+    #     return FileConfigDeploymentDescriptor.is_valid_config_id(self.config_id())
+
+
+class IniFileConfigDeploymentDescriptor(FileConfigDeploymentDescriptor):
     """
     Describes the deployment of secrets/values into an ini configuration file.
     """
-    def __init__(self, assignment_op: chr = '=', allow_multi_occurance: bool = False, **kwargs):
+    def __init__(self, assignment_op: str = '=', allow_multi_occurance: bool = False, **kwargs):
         """
         Validates parameters specific to the configuration type, alongside instantiation via the superclass' constructor.
         :param assignment_op:
         :param kwargs: All other deployment descriptor attributes.
         """
-        assert assignment_op in ['=', ':']
+        assert isinstance(assignment_op, str) and assignment_op in ['=', ':']
         self._assignment_op = assignment_op
 
+        assert isinstance(allow_multi_occurance, bool)
         self._allow_multi_occurance = allow_multi_occurance
 
         super(IniFileConfigDeploymentDescriptor, self).__init__(**kwargs)
@@ -110,12 +126,6 @@ class IniFileConfigDeploymentDescriptor(DeploymentDescriptor):
 
     def allow_multi_occurance(self):
         return self._allow_multi_occurance
-
-    def args(self):
-        return {
-            **super(IniFileConfigDeploymentDescriptor, self).args(),
-            **{'assignment_op': self.assignment_op(), 'allow_multi_occurance': self.allow_multi_occurance()}
-        }
 
 
 class Loader:
@@ -128,13 +138,13 @@ class Loader:
         raise NotImplementedError
 
     @classmethod
-    def parse(cls, dscrs: list):
+    def parse(cls, raw_dscr: typing.Union[list, dict]):
         """
-        Parses a list of dicts into a list of deployment descriptor objects of according type.
-        :param dscrs: List of dicts.
-        :return: List of deployment descriptors.
+        Parses a raw deployment descriptor or a list of raw deployment descriptors into objects of correct class.
+        :param raw_dscr: Dict or list of dicts representing raw deployment descriptors.
+        :return: List of deployment descriptor objects.
         """
-        return [DeploymentDescriptor.parse(**dscr) for dscr in dscrs]
+        return [DeploymentDescriptor.parse(**dscr) for dscr in (raw_dscr if isinstance(raw_dscr, list) else [raw_dscr])]
 
 
 class EnvironLoader(Loader):
@@ -151,4 +161,4 @@ class EnvironLoader(Loader):
         except KeyError:
             raise ValueError('Failed to load descriptor from environment variable \'{}\' which does not exist.'.format(EnvironLoader.SOURCE_ENV_VAR))
 
-        return EnvironLoader.parse(raw_dscr if isinstance(raw_dscr, list) else [raw_dscr])
+        return EnvironLoader.parse(raw_dscr)

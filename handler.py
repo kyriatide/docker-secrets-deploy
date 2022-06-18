@@ -8,7 +8,7 @@ Add support for templates of new configuration types by deriving from class `han
 """
 import io, os, re
 
-import provider as prvd
+import provider as prvd, descriptor as dscr
 
 TMPL_FILENAME_SUFFIX = '.tmpl'
 
@@ -42,18 +42,6 @@ class ConfigHdl:
 
 class FileConfigHdl(ConfigHdl):
 
-    def validate(self):
-        """
-        Only file URIs without host name and with absolute file paths are supported.
-        """""
-        VALID_FILEPATH_CHAR = '[A-z0-9-_+ \.]'
-        RE_ABSOLUTE_PATH = '^/({0}+\/)*({0}+(\.{0}*)?)$'.format(VALID_FILEPATH_CHAR)
-        FILE_URI_PREFIX = 'file://'
-
-        return ((self.config_id().find(FILE_URI_PREFIX) == 0) and
-                re.match(RE_ABSOLUTE_PATH, self.config_id()[len(FILE_URI_PREFIX):])) or \
-               re.match(RE_ABSOLUTE_PATH, self.config_id())
-
     def read(self) -> str:
         if os.path.exists(self.config_id()):
             file = open(self.config_id(), 'r')
@@ -72,7 +60,7 @@ class IniFileConfigHdl(FileConfigHdl):
     def __init__(self, config_id: str):
         super(IniFileConfigHdl, self).__init__(config_id)
 
-    def templatize(self, assignments: dict, assignment_op: str = '=', allow_multi_occurance: bool = False, **kwargs) -> str:
+    def templatize(self, desc: dscr.IniFileConfigDeploymentDescriptor) -> str:
         """
         Creates a template from a specific configuration by replacing actual occurances of
         configuration variables values by templating keywords, i.e., corresponding environment variable names,
@@ -88,22 +76,22 @@ class IniFileConfigHdl(FileConfigHdl):
 
         vars_found = []
         for line in io.StringIO(self.read()).readlines():
-            for key in assignments.keys():
-                match = re.search('^\s*' + key + '\s*' + assignment_op, line)
+            for key in desc.assignments().keys():
+                match = re.search('^\s*' + key + '\s*' + desc.assignment_op(), line)
                 if match:
-                    line = match.group(0) + ' {{.' + assignments[key] + '}}\n'
+                    line = match.group(0) + ' {{.' + desc.assignments()[key] + '}}\n'
                     vars_found += [key]
                     break
             template += line
 
         # check all assignments keys are found as variables in configuration
-        if set(vars_found) != set(assignments.keys()):
+        if set(vars_found) != set(desc.assignments().keys()):
             raise ValueError('Not all provided variables names found in configuration: {}.' \
-                             .format(', '.join(set(assignments.keys()).difference(vars_found))))
+                             .format(', '.join(set(desc.assignments().keys()).difference(vars_found))))
 
         # check every variable occured only once in the configuration if applicable
         multi_occurances = [v for v in vars_found if vars_found.count(v) > 1]
-        if not allow_multi_occurance and len(multi_occurances) > 0:
+        if not desc.allow_multi_occurance() and len(multi_occurances) > 0:
             raise ValueError('Variable(s) occur multiple times in configuration: {}.'.format(', '.join(multi_occurances)))
 
         return template
