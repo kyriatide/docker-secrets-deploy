@@ -33,7 +33,7 @@ class ConfigHdl:
     def write(self, config):
         raise NotImplementedError
 
-    def templatize(self, assignments: dict, **kwargs):
+    def templatize(self, desc: dscr.DeploymentDescriptor):
         raise NotImplementedError
 
     def config_id(self) -> str:
