@@ -79,20 +79,21 @@ class IniFileConfigHdl(FileConfigHdl):
             for key in desc.assignments().keys():
                 match = re.search('^\s*' + key + '\s*' + desc.assignment_op(), line)
                 if match:
-                    line = match.group(0) + ' {{.' + desc.assignments()[key] + '}}\n'
+                    line = match.group(0) + ' ' + TMPL_KEYWORD_PREFIX + desc.assignments()[key] + TMPL_KEYWORD_SUFFIX + '\n'
                     vars_updated += [key]
                     break
             template += line
-        print("Templatized found variable(s) {} ... ".format(vars_updated))
+        print("Templatized found variable(s) \'{}\'.".format(', '.join(vars_updated)))
 
         # check all assignments keys are found as variables in configuration
         vars_addn = set(desc.assignments().keys()).difference(set(vars_updated))
         if vars_addn:
-            template += '\n\n'
-            print("Added templatized variable(s) not found {} ... ".format(vars_addn))
-        for key in vars_addn:
-            # raise ValueError('Not all provided variables found in configuration: {}.'.format(', '.join(vars_addn)))
-            template += '{} {} {}\n'.format(key, desc.assignment_op(), desc.assignments()[key])
+            if template[-1] != '\n':
+                template += '\n'
+            for key in vars_addn:
+                template += '{} {} {}{}{}\n'.format(key, desc.assignment_op(),
+                                                    TMPL_KEYWORD_PREFIX, desc.assignments()[key], TMPL_KEYWORD_SUFFIX)
+            print("Templatized added variable(s) not found \'{}\'.".format(', '.join(vars_addn)))
 
         # check every variable occured only once in the configuration if applicable
         multi_occurances = [v for v in vars_updated if vars_updated.count(v) > 1]
@@ -170,10 +171,10 @@ class FileTemplateHdl(TemplateHdl):
                            line[line.find(tmpl_str) + len(tmpl_str):]
                     tmpl_kw_set += [tmpl_kw]
                 except KeyError:
-                    raise ValueError('Referenced template keyword {} not available from secrets provider {}.' \
+                    raise ValueError('Referenced template keyword \'{}\' not available from secrets provider {}.' \
                                      .format(tmpl_kw, provider.__class__.__name__))
             config += line
 
-        print('Instantiated template keyword(s) {}.'.format(tmpl_kw_set))
+        print('Instantiated template keyword(s) \'{}\'.'.format(', '.join(tmpl_kw_set)))
 
         return config
