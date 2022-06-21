@@ -1,0 +1,31 @@
+Test Group(s): #Deployment
+
+Variables in deployment descriptor == Variables in config file
+
+All matching variables should be replaced.
+--------------------------------------------------------------------------------
+
+>>> import sys, pathlib, os
+>>> import run, provider as prvd, descriptor as dscr
+
+>>> # absolute filepath to ${PWD}/tests/config/example.conf
+>>> filepath = os.path.join(pathlib.Path().parent.absolute(), 'tests', 'config', 'example.conf')
+>>> # JSON decoding needs four backward slashes
+>>> filepath = filepath.replace('\\', '\\\\')
+
+>>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
+...     '{"config": "' + filepath + '", "assign": {"pwd": "PASSWORD", "group": "GROUP"}}'
+>>> os.environ['PASSWORD'] = 'bLupdLr4R2HY'
+>>> os.environ['GROUP'] = 'None'
+
+>>> config = run.deploy(dry_run=True)
+Deploying secrets and variables into example.conf ...
+Templatized found variable(s) 'pwd, group'.
+Instantiated template keyword(s) 'PASSWORD, GROUP'.
+
+>>> print(config, end='')
+[account]
+user = admin
+pwd  = bLupdLr4R2HY
+description =
+group = None
