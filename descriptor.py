@@ -97,7 +97,7 @@ class FileConfigDeploymentDescriptor(DeploymentDescriptor):
         Only file URIs without host name and with absolute file paths are supported.
         """""
         VALID_FILEPATH_CHAR = '[A-z0-9-_+ \.]'
-        RE_ABSOLUTE_PATH = '^/({0}+\/)*({0}+(\.{0}*)?)$'.format(VALID_FILEPATH_CHAR)
+        RE_ABSOLUTE_PATH = '^([A-Z]:)?\{1}({0}+\{1})*({0}+(\.{0}*)?)$'.format(VALID_FILEPATH_CHAR, os.path.sep)
         FILE_URI_PREFIX = 'file://'
 
         return ((config_id.find(FILE_URI_PREFIX) == 0) and

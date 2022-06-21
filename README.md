@@ -64,18 +64,24 @@ See the folder `/example` for a complete example.
 
 ## Always Current Configurations
 
-Values are deployed into configurations by a two-step process.
+Values are deployed into configurations by a two-step process. 
 First, a transient template is generated from the configuration specified in the deployment descriptor,
-which is called *templatization*. And second, a new configuration is created by deploying secrets and 
+which is called *templatization*.
+And second, a new configuration is created by deploying secrets and 
 values into the template, which is called *instantiation*.
 
-Thereby, if a new version of a software was installed when rebuidling a docker image (newer compared to earlier images) 
+Thereby, if a new version of a software package was installed when rebuidling a docker image (newer compared to earlier images) 
 that updated its configuration file with, e.g., additional variables, the configuration created 
-would always be current, i.e., also comprise the newly added variables, because templatization (and instantiation) 
-always uses the current version of the configuration.
+would always be current, i.e., also comprise the newly added variables, because templatization and instantiation 
+use the current version of the configuration.
 
-This is different from manually creating a template from an initial version of a configuration. A configuration created
-based on that template will always be one of that initial version.
+This is different from manually creating a template from an initial package version's configuration at the time of
+developing the docker image (at development time), and using this template as the basis for the package's configuration 
+at the container's runtime. A configuration created based on that template will always be one of that initial version.
+
+Whether this feature is beneficial for you in your situation may depend.
+For always current images where you favor security and configuration management 
+simplicity over stability this might be particularly handy.
 
 ## Persistent Configurations Managed in Git
 
