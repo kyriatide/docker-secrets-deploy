@@ -30,18 +30,21 @@ class DeploymentDescriptor:
         """
         Note that the parameters of this method follow the JSON serialization attribute names of deployment
         descriptors, which does not always align with the naming conventions used throghout the code.
-        :param config: Conifguration Id.
+        :param config: Configuration id.
         :param assign: Variable assignments that shall be made in the referenced configuration.
         """
         # configuration-id is mandatory
-        assert config and isinstance(config, str)
+        assert config and isinstance(config, str) and len(config) > 0
         self._config_id = config
 
+        assert isinstance(templatize, bool)
+        assert assign is None or isinstance(assign, dict)
         assert (templatize and assign is not None and len(assign) > 0) or \
                (not templatize and (assign is None or len(assign) == 0))
         self._templatize = templatize
-
         self._assignments = assign
+        
+        assert isinstance(persist, bool)
         self._persist = persist
 
     def config_id(self):
@@ -83,8 +86,10 @@ class DeploymentDescriptor:
 
 class FileConfigDeploymentDescriptor(DeploymentDescriptor):
 
-    def __init__(self, **kwargs):
-        super(FileConfigDeploymentDescriptor, self).__init__(**kwargs)
+    def __init__(self, config: str=None, **kwargs):
+        super(FileConfigDeploymentDescriptor, self).__init__(**{**{'config': config}, **kwargs})
+
+        assert FileConfigDeploymentDescriptor.is_valid_config_id(config)
 
     @classmethod
     def is_valid_config_id(cls, config_id: str):
@@ -92,15 +97,12 @@ class FileConfigDeploymentDescriptor(DeploymentDescriptor):
         Only file URIs without host name and with absolute file paths are supported.
         """""
         VALID_FILEPATH_CHAR = '[A-z0-9-_+ \.]'
-        RE_ABSOLUTE_PATH = '^/({0}+\/)*({0}+(\.{0}*)?)$'.format(VALID_FILEPATH_CHAR)
+        RE_ABSOLUTE_PATH = '^([A-Z]:)?\{1}({0}+\{1})*({0}+(\.{0}*)?)$'.format(VALID_FILEPATH_CHAR, os.path.sep)
         FILE_URI_PREFIX = 'file://'
 
         return ((config_id.find(FILE_URI_PREFIX) == 0) and
                 re.match(RE_ABSOLUTE_PATH, config_id[len(FILE_URI_PREFIX):])) or \
                re.match(RE_ABSOLUTE_PATH, config_id)
-
-    # def validate(self):
-    #     return FileConfigDeploymentDescriptor.is_valid_config_id(self.config_id())
 
 
 class IniFileConfigDeploymentDescriptor(FileConfigDeploymentDescriptor):
@@ -113,13 +115,13 @@ class IniFileConfigDeploymentDescriptor(FileConfigDeploymentDescriptor):
         :param assignment_op:
         :param kwargs: All other deployment descriptor attributes.
         """
+        super(IniFileConfigDeploymentDescriptor, self).__init__(**kwargs)
+
         assert isinstance(assignment_op, str) and assignment_op in ['=', ':']
         self._assignment_op = assignment_op
 
         assert isinstance(allow_multi_occurance, bool)
         self._allow_multi_occurance = allow_multi_occurance
-
-        super(IniFileConfigDeploymentDescriptor, self).__init__(**kwargs)
 
     def assignment_op(self):
         return self._assignment_op

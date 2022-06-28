@@ -33,7 +33,7 @@ class ConfigHdl:
     def write(self, config):
         raise NotImplementedError
 
-    def templatize(self, assignments: dict, **kwargs):
+    def templatize(self, desc: dscr.DeploymentDescriptor):
         raise NotImplementedError
 
     def config_id(self) -> str:
@@ -74,23 +74,29 @@ class IniFileConfigHdl(FileConfigHdl):
         """
         template = ''
 
-        vars_found = []
+        vars_updated = []
         for line in io.StringIO(self.read()).readlines():
             for key in desc.assignments().keys():
                 match = re.search('^\s*' + key + '\s*' + desc.assignment_op(), line)
                 if match:
-                    line = match.group(0) + ' {{.' + desc.assignments()[key] + '}}\n'
-                    vars_found += [key]
+                    line = match.group(0) + ' ' + TMPL_KEYWORD_PREFIX + desc.assignments()[key] + TMPL_KEYWORD_SUFFIX + '\n'
+                    vars_updated += [key]
                     break
             template += line
+        print("Templatized found variable(s) \'{}\'.".format(', '.join(vars_updated)))
 
         # check all assignments keys are found as variables in configuration
-        if set(vars_found) != set(desc.assignments().keys()):
-            raise ValueError('Not all provided variables names found in configuration: {}.' \
-                             .format(', '.join(set(desc.assignments().keys()).difference(vars_found))))
+        vars_addn = set(desc.assignments().keys()).difference(set(vars_updated))
+        if vars_addn:
+            if template[-1] != '\n':
+                template += '\n'
+            for key in vars_addn:
+                template += '{} {} {}{}{}\n'.format(key, desc.assignment_op(),
+                                                    TMPL_KEYWORD_PREFIX, desc.assignments()[key], TMPL_KEYWORD_SUFFIX)
+            print("Templatized added variable(s) not found \'{}\'.".format(', '.join(vars_addn)))
 
         # check every variable occured only once in the configuration if applicable
-        multi_occurances = [v for v in vars_found if vars_found.count(v) > 1]
+        multi_occurances = [v for v in vars_updated if vars_updated.count(v) > 1]
         if not desc.allow_multi_occurance() and len(multi_occurances) > 0:
             raise ValueError('Variable(s) occur multiple times in configuration: {}.'.format(', '.join(multi_occurances)))
 
@@ -150,21 +156,25 @@ class FileTemplateHdl(TemplateHdl):
         :return:
         """
         config = ''
+        tmpl_kw_set = []
 
         for line in io.StringIO(template).readlines():
-            # search for environment variable name in brackets
+            # search for template string
             match = re.search(TMPL_KEYWORD_PREFIX + '.+' + TMPL_KEYWORD_SUFFIX, line)
             if match:
                 tmpl_str = match.group(0)
-                tmpl_keyword = tmpl_str[len(TMPL_KEYWORD_PREFIX):-len(TMPL_KEYWORD_SUFFIX)]
+                tmpl_kw = tmpl_str[len(TMPL_KEYWORD_PREFIX):-len(TMPL_KEYWORD_SUFFIX)]
 
                 try:
                     line = line[:line.find(tmpl_str)] + \
-                           provider.get(tmpl_keyword) + \
+                           provider.get(tmpl_kw) + \
                            line[line.find(tmpl_str) + len(tmpl_str):]
+                    tmpl_kw_set += [tmpl_kw]
                 except KeyError:
-                    raise ValueError('Referenced template keyword {} not available from secrets provider {}.' \
-                                     .format(tmpl_keyword, provider.__class__.__name__))
+                    raise ValueError('Referenced template keyword \'{}\' not available from secrets provider {}.' \
+                                     .format(tmpl_kw, provider.__class__.__name__))
             config += line
+
+        print('Instantiated template keyword(s) \'{}\'.'.format(', '.join(tmpl_kw_set)))
 
         return config
