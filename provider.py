@@ -10,6 +10,7 @@ Currently available providers are:
 """
 import os
 
+
 class Provider:
 
     def __init__(self, **kwargs):
@@ -26,4 +27,7 @@ class EnvironProvider(Provider):
         super(EnvironProvider, self).__init__(**kwargs)
 
     def get(self, name: str) -> str:
-        return os.environ[name]
+        try:
+            return os.environ[name]
+        except KeyError:
+            raise ValueError('Environment Secrets Provider cannot provide a value for keyword \'{}\'.'.format(name))

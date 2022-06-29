@@ -151,8 +151,8 @@ so if there is no templatization, this attribute must be empty.
 
 For ini configuration files:
 * `assignment_op` (default: `=`): Defines the operator used in the config file to assign values to variables.
-* `allow_multi_occurance` (default: `false`): Check every variable occured only once in the configuration. Alleged
-multiple occurances usually indicate an error, e.g., caused by a variable name that is not unique.
+* `assignment_shell_style` (default: `false`): Forces assignment of values to variables to follow POSIX shell style syntax, i.e., without whitespace in between the variable name, the assignment operator, and the values, as e.g. in `VARIABLE="value"`. Otherwise, the whitespace contained in the original configuration file is preserved. 
+* `allow_multi_occurrence` (default: `false`): Check every variable occured only once in the configuration. Alleged multiple occurrences usually indicate an error, e.g., caused by a variable name that is not unique.
 
 # Extensibility
 
