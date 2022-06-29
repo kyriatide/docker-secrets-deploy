@@ -1,8 +1,7 @@
-Test Group(s): #Deployment
+Variables in deployment descriptor ⊃ Variables in config file
 
-Variables in deployment descriptor == Variables in config file
-
-All matching variables should be replaced.
+Variables in the deployment descriptor (i.e., its ``assign`` attribute) that are not
+not contained in the configuration file, should be added at the end of the configuration.
 --------------------------------------------------------------------------------
 
 >>> import sys, pathlib, os
@@ -14,18 +13,20 @@ All matching variables should be replaced.
 >>> filepath = filepath.replace('\\', '\\\\')
 
 >>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
-...     '{"config": "' + filepath + '", "assign": {"pwd": "PASSWORD", "group": "GROUP"}}'
+...     '{"config": "' + filepath + '", "assign": {"pwd": "PASSWORD", "admin_pwd": "ADMIN_PASSWORD"}}'
 >>> os.environ['PASSWORD'] = 'bLupdLr4R2HY'
->>> os.environ['GROUP'] = 'None'
+>>> os.environ['ADMIN_PASSWORD'] = 'fS3JV3MuAWg9'
 
 >>> config = run.deploy(dry_run=True)
 Deploying secrets and variables into example.conf ...
-Templatized found variable(s) 'pwd, group'.
-Instantiated template keyword(s) 'PASSWORD, GROUP'.
+Found variable(s) during templatization 'pwd'.
+Added variable(s) not found during templatization 'admin_pwd'.
+Instantiated template keyword(s) 'PASSWORD, ADMIN_PASSWORD'.
 
 >>> print(config, end='')
 [account]
 user = admin
-pwd  = bLupdLr4R2HY
+pwd  =bLupdLr4R2HY
 description =
-group = None
+group = 1
+admin_pwd = fS3JV3MuAWg9

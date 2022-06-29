@@ -1,0 +1,53 @@
+Test @@
+--------------------------------------------------------------------------------
+
+>>> import pathlib, os
+>>> import descriptor as dscr
+
+# Absolute filepath to ${PWD}/tests/config/example.conf
+# JSON decoding needs four backward slashes
+>>> filepath = os.path.join(pathlib.Path().parent.absolute(), 'tests', 'config', 'example.conf').replace('\\', '\\\\')
+
+# DeploymentDescriptor
+
+## Conflicting attributes: templatize and assign
+
+>>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
+...     '{"config": "' + filepath + '", "assign": {"pwd": "PASSWORD", "admin_pwd": "ADMIN_PASSWORD"}, "templatize": false}'
+>>> type(dscr.EnvironLoader.load()[0])
+Traceback (most recent call last):
+...
+AssertionError
+
+>>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
+...     '{"config": "' + filepath + '", "templatize": true}'
+>>> type(dscr.EnvironLoader.load()[0])
+Traceback (most recent call last):
+...
+AssertionError
+
+# FileConfigDeploymentDescriptor
+
+## Not an absolute filepath
+
+>>> filepath_rel = os.path.join('tests', 'config', 'example.conf').replace('\\', '\\\\')
+>>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
+...     '{"config": "' + filepath_rel + '", "assign": {"pwd": "PASSWORD", "admin_pwd": "ADMIN_PASSWORD"}}'
+
+>>> type(dscr.EnvironLoader.load()[0])
+Traceback (most recent call last):
+...
+ValueError: Configuration identifier 'tests\config\example.conf' is not supported.
+
+## Not a valid filepath
+
+# IniFileConfigDeploymentDescriptor
+
+## Invalid assignment_op
+
+>>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
+...     '{"config": "' + filepath + '", "assign": {"pwd": "PASSWORD"}, "assignment_op": "-"}'
+>>> type(dscr.EnvironLoader.load()[0])
+Traceback (most recent call last):
+...
+AssertionError

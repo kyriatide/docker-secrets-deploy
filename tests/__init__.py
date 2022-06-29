@@ -12,7 +12,9 @@ def setup():
 
     # copy files
     sync_files = {os.path.join(DIR_TESTS_CONFIG_SOURCE, 'example.conf'): os.path.join(DIR_TESTS_CONIFG, 'example.conf'),
+                  os.path.join(DIR_TESTS_CONFIG_SOURCE, 'example_par-abs.conf'): os.path.join(DIR_TESTS_CONIFG, 'example_par-abs.conf'),
                   os.path.join(DIR_TESTS_CONFIG_SOURCE, 'example.conf.tmpl'): os.path.join(DIR_TESTS_CONIFG, 'example.conf.tmpl')}
+
     for source, target in sync_files.items():
         print('Copy {} to {} ...'.format(source, target))
         shutil.copy(source, target)

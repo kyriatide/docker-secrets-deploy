@@ -1,0 +1,24 @@
+Test @@
+--------------------------------------------------------------------------------
+
+>>> import pathlib, os
+>>> import descriptor as dscr
+
+# Absolute filepath to ${PWD}/tests/config/example.conf
+# JSON decoding needs four backward slashes
+>>> filepath = os.path.join(pathlib.Path().parent.absolute(), 'tests', 'config', 'example.conf').replace('\\', '\\\\')
+
+# Environment Loader
+# cannot load without environment variable
+
+>>> descs = dscr.EnvironLoader.load()
+Traceback (most recent call last):
+...
+ValueError: Failed to load descriptor from environment variable 'DCKR_SCRTS_DEPLOY' which does not exist.
+
+# loads with environment variable available
+
+>>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
+...     '{"config": "' + filepath + '", "assign": {"pwd": "PASSWORD", "admin_pwd": "ADMIN_PASSWORD"}}'
+>>> type(dscr.EnvironLoader.load()[0])
+<class 'descriptor.IniFileConfigDeploymentDescriptor'>

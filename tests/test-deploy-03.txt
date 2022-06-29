@@ -1,5 +1,3 @@
-Test Group(s): #Deployment
-
 Variables in deployment descriptor ⊂ Keyword names in template file
 
 An exception should be raised when not all keyword names from the template
@@ -9,10 +7,9 @@ can be filled from the secrets provider.
 >>> import sys, pathlib, os
 >>> import run, provider as prvd, descriptor as dscr
 
->>> # absolute filepath to ${PWD}/tests/config/example.conf
->>> filepath = os.path.join(pathlib.Path().parent.absolute(), 'tests', 'config', 'example.conf')
->>> # JSON decoding needs four backward slashes
->>> filepath = filepath.replace('\\', '\\\\')
+# Absolute filepath to ${PWD}/tests/config/example.conf
+# JSON decoding needs four backward slashes
+>>> filepath = os.path.join(pathlib.Path().parent.absolute(), 'tests', 'config', 'example.conf').replace('\\', '\\\\')
 
 >>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
 ...     '{"config": "' + filepath + '", "templatize": false}'

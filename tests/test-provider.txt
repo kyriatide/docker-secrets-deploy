@@ -1,0 +1,27 @@
+Tests for Secret Providers
+
+--------------------------------------------------------------------------------
+
+>>> import os
+>>> import provider as prvd
+
+# Environment Secrets Provider
+
+## Retrieve keyword
+
+>>> os.environ['PASSWORD'] = 'bLupdLr4R2HY'
+>>> prvd.EnvironProvider().get('PASSWORD')
+'bLupdLr4R2HY'
+
+## Attempt to retrieve missing keyword
+The reason will usually be that the keyword's value has not been specified/provided.
+
+>>> os.environ.pop('PASSWORD')
+'bLupdLr4R2HY'
+
+>>> prvd.EnvironProvider().get('PASSWORD')
+Traceback (most recent call last):
+...
+ValueError: Environment Secrets Provider cannot provide a value for keyword 'PASSWORD'.
+
+# Further Secrets Provider
