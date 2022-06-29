@@ -1,0 +1,46 @@
+Tests behavior of parameter assignment_shell_style
+
+--------------------------------------------------------------------------------
+
+>>> import sys, pathlib, os
+>>> import run, provider as prvd, descriptor as dscr
+
+# Absolute filepath to ${PWD}/tests/config/example.conf
+# JSON decoding needs four backward slashes
+>>> filepath = os.path.join(pathlib.Path().parent.absolute(), 'tests', 'config', 'example_par-abs.conf').replace('\\', '\\\\')
+
+>>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
+...     '{"config": "' + filepath + '", "assign": {"ENABLED": "ENV_ENABLED", "ADDITIONAL": "ENV_ADDITIONAL"}, "assignment_op": "=", "assignment_shell_style": true}'
+>>> os.environ['ENV_ENABLED'] = '"1"'
+>>> os.environ['ENV_ADDITIONAL'] = 'True'
+
+>>> config = run.deploy(dry_run=True)
+Deploying secrets and variables into example_par-abs.conf ...
+Found variable(s) during templatization 'ENABLED'.
+Added variable(s) not found during templatization 'ADDITIONAL'.
+Instantiated template keyword(s) 'ENV_ENABLED, ENV_ADDITIONAL'.
+
+>>> print(config, end='')
+# Defaults for vdradmin initscript
+# sourced by /etc/init.d/vdradmin-am
+# installed at /etc/default/vdradmin-am by the maintainer scripts
+#
+# This is a POSIX shell fragment
+#
+# Should vdradmin's init-script be enabled?
+<BLANKLINE>
+####################################################################
+# ATTENTION! YOU SHOULD MODIFY /var/lib/vdradmin-am/vdradmind.conf
+#
+# before enabling this, because the default config uses a
+#
+# really simple default username/password (linvdr/linvdr)
+#
+####################################################################
+<BLANKLINE>
+ENABLED="1"
+<BLANKLINE>
+# Nicevalue to use when running vdradmin-am
+<BLANKLINE>
+NICE="10"
+ADDITIONAL=True

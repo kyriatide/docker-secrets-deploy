@@ -1,0 +1,29 @@
+Variables in deployment descriptor ⊂ Keyword names in template file
+
+An exception should be raised when not all keyword names from the template
+can be filled from the secrets provider.
+--------------------------------------------------------------------------------
+
+>>> import sys, pathlib, os
+>>> import run, provider as prvd, descriptor as dscr
+
+# Absolute filepath to ${PWD}/tests/config/example.conf
+# JSON decoding needs four backward slashes
+>>> filepath_1 = os.path.join(pathlib.Path().parent.absolute(), 'tests', 'config', 'example.conf').replace('\\', '\\\\')
+>>> os.environ['PASSWORD'] = 'bLupdLr4R2HY'
+
+>>> filepath_2 = os.path.join(pathlib.Path().parent.absolute(), 'tests', 'config', 'example_par-abs.conf').replace('\\', '\\\\')
+>>> os.environ['ENV_ENABLED'] = '"1"'
+>>> os.environ['ENV_ADDITIONAL'] = 'True'
+
+>>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
+...     '[{"config": "' + filepath_1 + '", "assign": {"pwd": "PASSWORD"}}, {"config": "' + filepath_2 + '", "assign": {"ENABLED": "ENV_ENABLED", "ADDITIONAL": "ENV_ADDITIONAL"}, "assignment_op": "=", "assignment_shell_style": true}]'
+
+>>> config = run.deploy(dry_run=True)
+Deploying secrets and variables into example.conf ...
+Found variable(s) during templatization 'pwd'.
+Instantiated template keyword(s) 'PASSWORD'.
+Deploying secrets and variables into example_par-abs.conf ...
+Found variable(s) during templatization 'ENABLED'.
+Added variable(s) not found during templatization 'ADDITIONAL'.
+Instantiated template keyword(s) 'ENV_ENABLED, ENV_ADDITIONAL'.

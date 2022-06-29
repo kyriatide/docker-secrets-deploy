@@ -1,0 +1,19 @@
+Tests parameter assignment_op
+
+--------------------------------------------------------------------------------
+
+>>> import sys, pathlib, os
+>>> import run, provider as prvd, descriptor as dscr
+
+Absolute filepath to ${PWD}/tests/config/example.conf
+JSON decoding needs four backward slashes
+>>> filepath = os.path.join(pathlib.Path().parent.absolute(), 'tests', 'config', 'example.conf').replace('\\', '\\\\')
+
+>>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
+...     '{"config": "' + filepath + '", "assign": {"pwd": "PASSWORD"}, "assignment_op": "="}'
+>>> os.environ['PASSWORD'] = 'bLupdLr4R2HY'
+
+>>> config = run.deploy(dry_run=True)
+Deploying secrets and variables into example.conf ...
+Found variable(s) during templatization 'pwd'.
+Instantiated template keyword(s) 'PASSWORD'.
