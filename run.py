@@ -22,7 +22,7 @@ def deploy(loader_cls: dscr.Loader = dscr.EnvironLoader,
     The created configuration is persisted by default.
 
     :param loader_cls: Loader class for loading deployment descriptors.
-    :param provider_cls: Provider class for loading secrets and variable values.
+    :param provider_cls: Secrets Provider class for loading secrets and variable values.
     :param config_cls: Configuration class.
     :param template_cls: Template class.
     :param dry_run: Defines whether the configuration created should be persisted to disk. This does not impact
@@ -33,9 +33,7 @@ def deploy(loader_cls: dscr.Loader = dscr.EnvironLoader,
     :returns: Conifguration into which secrets and values have been deployed.
     """
     # Load deployment descriptors using the given loader
-    descs = loader_cls.load()
-
-    for desc in descs:
+    for desc in loader_cls.load():
         # retrieve deployment descriptor
         assert isinstance(desc, dscr.DeploymentDescriptor)
         print('Deploying secrets and variables into {} ...'.format(pathlib.Path(desc.config_id()).parts[-1]))
@@ -66,7 +64,7 @@ def deploy(loader_cls: dscr.Loader = dscr.EnvironLoader,
             # write new configuration
             config_hdl.write(config)
 
-        return config
+        sys.stdout.flush()
 
 
 def cmd(args) -> int:
