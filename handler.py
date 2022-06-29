@@ -165,14 +165,11 @@ class FileTemplateHdl(TemplateHdl):
                 tmpl_str = match.group(0)
                 tmpl_kw = tmpl_str[len(TMPL_KEYWORD_PREFIX):-len(TMPL_KEYWORD_SUFFIX)]
 
-                try:
-                    line = line[:line.find(tmpl_str)] + \
-                           provider.get(tmpl_kw) + \
-                           line[line.find(tmpl_str) + len(tmpl_str):]
-                    tmpl_kw_set += [tmpl_kw]
-                except KeyError:
-                    raise ValueError('Referenced template keyword \'{}\' not available from secrets provider {}.' \
-                                     .format(tmpl_kw, provider.__class__.__name__))
+                line = line[:line.find(tmpl_str)] + \
+                       provider.get(tmpl_kw) + \
+                       line[line.find(tmpl_str) + len(tmpl_str):]
+                tmpl_kw_set += [tmpl_kw]
+
             config += line
 
         print('Instantiated template keyword(s) \'{}\'.'.format(', '.join(tmpl_kw_set)))
