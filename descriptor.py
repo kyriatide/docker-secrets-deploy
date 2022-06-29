@@ -109,10 +109,13 @@ class IniFileConfigDeploymentDescriptor(FileConfigDeploymentDescriptor):
     """
     Describes the deployment of secrets/values into an ini configuration file.
     """
-    def __init__(self, assignment_op: str = '=', allow_multi_occurance: bool = False, **kwargs):
+    def __init__(self, assignment_op: str = '=', assignment_shell_style: bool = False,
+                 allow_multi_occurrence: bool = False, **kwargs):
         """
         Validates parameters specific to the configuration type, alongside instantiation via the superclass' constructor.
-        :param assignment_op:
+        :param assignment_op: Assignment operator.
+        :param assignment_shell_style: Shell style assignment, i.e., without whitespace.
+        :param allow_multi_occurrence: Allow multiple occurrences of a variable name.
         :param kwargs: All other deployment descriptor attributes.
         """
         super(IniFileConfigDeploymentDescriptor, self).__init__(**kwargs)
@@ -120,14 +123,20 @@ class IniFileConfigDeploymentDescriptor(FileConfigDeploymentDescriptor):
         assert isinstance(assignment_op, str) and assignment_op in ['=', ':']
         self._assignment_op = assignment_op
 
-        assert isinstance(allow_multi_occurance, bool)
-        self._allow_multi_occurance = allow_multi_occurance
+        assert isinstance(assignment_shell_style, bool)
+        self._assignment_shell_style = assignment_shell_style
+
+        assert isinstance(allow_multi_occurrence, bool)
+        self._allow_multi_occurrence = allow_multi_occurrence
 
     def assignment_op(self):
         return self._assignment_op
 
-    def allow_multi_occurance(self):
-        return self._allow_multi_occurance
+    def assignment_shell_style(self):
+        return self._assignment_shell_style
+
+    def allow_multi_occurrence(self):
+        return self._allow_multi_occurrence
 
 
 class Loader:
