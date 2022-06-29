@@ -18,12 +18,12 @@ All matching variables should be replaced.
 
 >>> config = run.deploy(dry_run=True)
 Deploying secrets and variables into example.conf ...
-Templatized found variable(s) 'pwd, group'.
+Found variable(s) during templatization 'pwd, group'.
 Instantiated template keyword(s) 'PASSWORD, GROUP'.
 
 >>> print(config, end='')
 [account]
 user = admin
-pwd  = bLupdLr4R2HY
+pwd  =bLupdLr4R2HY
 description =
 group = None

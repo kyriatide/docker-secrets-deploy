@@ -17,4 +17,4 @@ can be filled from the secrets provider.
 >>> config = run.deploy(dry_run=True)
 Traceback (most recent call last):
     ...
-ValueError: Referenced template keyword 'PASSWORD' not available from secrets provider EnvironProvider.
+ValueError: Environment Secrets Provider cannot provide a value for keyword 'PASSWORD'.

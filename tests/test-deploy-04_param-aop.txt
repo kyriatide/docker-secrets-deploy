@@ -15,5 +15,5 @@ JSON decoding needs four backward slashes
 
 >>> config = run.deploy(dry_run=True)
 Deploying secrets and variables into example.conf ...
-Found variable(s) in templatization 'pwd'.
+Found variable(s) during templatization 'pwd'.
 Instantiated template keyword(s) 'PASSWORD'.
