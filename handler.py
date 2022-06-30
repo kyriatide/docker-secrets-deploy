@@ -107,6 +107,7 @@ class TemplateHdl:
 
     def __init__(self, config_hdl: ConfigHdl):
         self._config_hdl = config_hdl
+        # derivation of template_id from config_id needs to be implemented by subclasses
         self._template_id = None
 
     def read(self):
