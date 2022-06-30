@@ -14,7 +14,7 @@ Tests behavior of parameter assignment_shell_style
 >>> os.environ['ENV_ENABLED'] = '"1"'
 >>> os.environ['ENV_ADDITIONAL'] = 'True'
 
->>> config = run.deploy(dry_run=True)
+>>> config = run.deploy(persist_config=False)[0]
 Deploying secrets and variables into example_par-abs.conf ...
 Found variable(s) during templatization 'ENABLED'.
 Added variable(s) not found during templatization 'ADDITIONAL'.

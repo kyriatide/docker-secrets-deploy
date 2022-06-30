@@ -13,7 +13,7 @@ JSON decoding needs four backward slashes
 ...     '{"config": "' + filepath + '", "assign": {"pwd": "PASSWORD"}, "assignment_op": "="}'
 >>> os.environ['PASSWORD'] = 'bLupdLr4R2HY'
 
->>> config = run.deploy(dry_run=True)
+>>> config = run.deploy(persist_config=False)[0]
 Deploying secrets and variables into example.conf ...
 Found variable(s) during templatization 'pwd'.
 Instantiated template keyword(s) 'PASSWORD'.

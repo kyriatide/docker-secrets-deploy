@@ -14,7 +14,7 @@ can be filled from the secrets provider.
 >>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
 ...     '{"config": "' + filepath + '", "templatize": false}'
 
->>> config = run.deploy(dry_run=True)
+>>> config = run.deploy(persist_config=False)[0]
 Traceback (most recent call last):
     ...
 ValueError: Environment Secrets Provider cannot provide a value for keyword 'PASSWORD'.

@@ -17,7 +17,7 @@ not contained in the configuration file, should be added at the end of the confi
 >>> os.environ['PASSWORD'] = 'bLupdLr4R2HY'
 >>> os.environ['ADMIN_PASSWORD'] = 'fS3JV3MuAWg9'
 
->>> config = run.deploy(dry_run=True)
+>>> config = run.deploy(persist_config=False)[0]
 Deploying secrets and variables into example.conf ...
 Found variable(s) during templatization 'pwd'.
 Added variable(s) not found during templatization 'admin_pwd'.

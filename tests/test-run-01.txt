@@ -1,0 +1,13 @@
+Test correct piping of stdout of run.cmd()
+
+--------------------------------------------------------------------------------
+
+>>> import sys, os, pathlib
+>>> import run
+
+# set environment variables
+>>> scriptpath = str(pathlib.Path().parent.absolute())
+
+>>> cmd = os.path.join(scriptpath, 'tests', 'service.sh')
+
+>>> run.cmd([cmd])

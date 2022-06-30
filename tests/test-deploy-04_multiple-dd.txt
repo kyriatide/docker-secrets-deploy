@@ -1,7 +1,5 @@
-Variables in deployment descriptor ⊂ Keyword names in template file
+Multiple deployment descriptors
 
-An exception should be raised when not all keyword names from the template
-can be filled from the secrets provider.
 --------------------------------------------------------------------------------
 
 >>> import sys, pathlib, os
@@ -19,7 +17,7 @@ can be filled from the secrets provider.
 >>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
 ...     '[{"config": "' + filepath_1 + '", "assign": {"pwd": "PASSWORD"}}, {"config": "' + filepath_2 + '", "assign": {"ENABLED": "ENV_ENABLED", "ADDITIONAL": "ENV_ADDITIONAL"}, "assignment_op": "=", "assignment_shell_style": true}]'
 
->>> config = run.deploy(dry_run=True)
+>>> config = run.deploy(persist_config=False)
 Deploying secrets and variables into example.conf ...
 Found variable(s) during templatization 'pwd'.
 Instantiated template keyword(s) 'PASSWORD'.
