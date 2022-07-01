@@ -1,5 +1,12 @@
 #!/bin/python3
 #
+
+"""
+The script can be used in two modes/ways:
+* entrypoint
+* interactive
+"""
+
 import pathlib, sys, subprocess, importlib
 import handler, descriptor as dscr, provider
 
@@ -8,7 +15,7 @@ def deploy(loader_cls: dscr.Loader = dscr.EnvironLoader,
            provider_cls: provider.Provider = provider.EnvironProvider,
            config_cls: handler.ConfigHdl = handler.IniFileConfigHdl,
            template_cls: handler.TemplateHdl = handler.FileTemplateHdl,
-           dry_run: bool = False):
+           persist_config: bool = True):
     """
     Deploys actual secrets and configuration values into a configuration.
 
@@ -25,13 +32,13 @@ def deploy(loader_cls: dscr.Loader = dscr.EnvironLoader,
     :param provider_cls: Secrets Provider class for loading secrets and variable values.
     :param config_cls: Configuration class.
     :param template_cls: Template class.
-    :param dry_run: Defines whether the configuration created should be persisted to disk. This does not impact
-        behavior of deployment descriptor directives that affect persistence of some sort, like persist.
-        Parameter dry_run has not been made part of the deployment descriptor, as it is primarily intended to
-        be used programmatically to e.g. ease testing, and is not intended for specification by a user via
+    :param persist_config: Defines whether configurations should be stored to disk, which is the default.
+        This parameter has not been made part of the deployment descriptor because it is primarily intended to
+        be used programmatically, e.g., for testing, and is not intended for specification by a user via
         a deployment descriptor.
-    :returns: Conifguration into which secrets and values have been deployed.
+    :returns: List of configurations into which secrets and values have been deployed.
     """
+    configs = []
     # Load deployment descriptors using the given loader
     for desc in loader_cls.load():
         # retrieve deployment descriptor
@@ -59,13 +66,15 @@ def deploy(loader_cls: dscr.Loader = dscr.EnvironLoader,
 
         # 2. instantiate the template using the secrets provider
         config = template_hdl.instantiate(template, provider_cls())
+        configs += [config]
 
-        if not dry_run:
+        if persist_config:
             # write new configuration
             config_hdl.write(config)
 
         sys.stdout.flush()
 
+    return configs
 
 def cmd(args) -> int:
     """

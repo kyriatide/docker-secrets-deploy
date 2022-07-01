@@ -70,22 +70,31 @@ class IniFileConfigHdl(FileConfigHdl):
         """
         template = ''
 
-        vars_found = []
+        vars_found_active = []
+        # subset of vars_found containing commented found variables
+        vars_found_commented = []
         for line in io.StringIO(self.read()).readlines():
             for key in desc.assignments().keys():
-                match_expr = '^\s*' + key + '\s*' + desc.assignment_op() + '[ \t]*' \
-                    if not desc.assignment_shell_style() else '^\s*' + key + desc.assignment_op()
+                assign_ws = '[ \t]*' if not desc.assignment_shell_style() else ''
+                match_expr = '^[ \t]*({0})?[ \t]*{1}{2}{3}{2}' \
+                    .format(desc.comment_delimiter(), key, assign_ws, desc.assignment_op())
                 match = re.search(match_expr, line)
                 if match:
-                    line = match.group(0) + \
-                           TMPL_KEYWORD_PREFIX + desc.assignments()[key] + TMPL_KEYWORD_SUFFIX + '\n'
-                    vars_found += [key]
+                    if match.group(0).lstrip().find(desc.comment_delimiter()) == -1:
+                        # only replace if active line (i.e., not commented), otherwise leave as-is
+                        line = match.group(0) + \
+                               TMPL_KEYWORD_PREFIX + desc.assignments()[key] + TMPL_KEYWORD_SUFFIX + '\n'
+                        vars_found_active += [key]
+                    elif match.group(0).lstrip().find(desc.comment_delimiter()) == 0:
+                        vars_found_commented += [key]
                     break
             template += line
-        print('Found variable(s) during templatization \'{}\'.'.format(', '.join(vars_found)))
+        print('Found variable(s) during templatization \'{}\'.'.format(', '.join(vars_found_active)))
+        if len(vars_found_commented) > 0:
+            print('Found commented variable(s) during templatization \'{}\'.'.format(', '.join(vars_found_commented)))
 
-        # check all assignments keys are found as variables in configuration
-        vars_not_found = set(desc.assignments().keys()).difference(set(vars_found))
+        # check all assignments keys are found (at least once) as variables in configuration, either active or commented
+        vars_not_found = set(desc.assignments().keys()).difference(set(vars_found_active).union(vars_found_commented))
         if vars_not_found:
             whitespace = ' ' if not desc.assignment_shell_style() else ''
             if template[-1] != '\n':
@@ -95,8 +104,8 @@ class IniFileConfigHdl(FileConfigHdl):
                                                     TMPL_KEYWORD_PREFIX, desc.assignments()[key], TMPL_KEYWORD_SUFFIX)
             print('Added variable(s) not found during templatization \'{}\'.'.format(', '.join(vars_not_found)))
 
-        # check every variable occured only once in the configuration if applicable
-        multi_occurrences = [v for v in vars_found if vars_found.count(v) > 1]
+        # check every variable occurred only once as active variable in the configuration, if applicable
+        multi_occurrences = [v for v in vars_found_active if vars_found_active.count(v) > 1]
         if not desc.allow_multi_occurrence() and len(multi_occurrences) > 0:
             raise ValueError('Variable(s) occur multiple times in configuration: {}.'.format(', '.join(multi_occurrences)))
 
@@ -107,6 +116,7 @@ class TemplateHdl:
 
     def __init__(self, config_hdl: ConfigHdl):
         self._config_hdl = config_hdl
+        # derivation of template_id from config_id needs to be implemented by subclasses
         self._template_id = None
 
     def read(self):
