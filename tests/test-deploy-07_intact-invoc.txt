@@ -1,5 +1,0 @@
-
-
-
-
-DCKR_SCRTS_DEPLOY='{"config": "/home/martin/Documents/docker-secrets-deploy/tests/config/example.conf", "assign": {"pwd": "PASSWORD"}}' PASSWORD='p3Iy47UQGXoq' python3 run.py

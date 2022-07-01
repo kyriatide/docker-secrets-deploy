@@ -1,0 +1,17 @@
+@@
+
+--------------------------------------------------------------------------------
+
+>>> import os, pathlib, subprocess
+>>> import descriptor as dscr, run, handler as tmpl
+
+# Absolute filepath to ${PWD}/tests/config/example.conf
+# JSON decoding needs four backward slashes
+>>> filepath_conf = os.path.join(pathlib.Path().parent.absolute(), 'tests', 'config', 'example.conf')
+>>> filepath_run = os.path.join(pathlib.Path().parent.absolute(), 'run.py')
+
+>>> cmd = [
+...    'DCKR_SCRTS_DEPLOY=\'{"config": "'' + filepath_conf + ''", "assign": {"pwd": "PASSWORD"}}\'',
+...    'PASSWORD=\'p3Iy47UQGXoq\'', 'python3', filepath_run]
+
+subprocess.run(cmd)

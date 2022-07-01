@@ -1,4 +1,4 @@
-import os, pathlib, shutil
+import os, pathlib, shutil, glob
 
 DIR_TESTS = os.path.join(pathlib.Path(__file__).parent.absolute())
 
@@ -11,11 +11,8 @@ def setup():
     os.makedirs(DIR_TESTS_CONIFG, exist_ok=True)
 
     # copy files
-    sync_files = {os.path.join(DIR_TESTS_CONFIG_SOURCE, 'example.conf'): os.path.join(DIR_TESTS_CONIFG, 'example.conf'),
-                  os.path.join(DIR_TESTS_CONFIG_SOURCE, 'example_par-abs.conf'): os.path.join(DIR_TESTS_CONIFG, 'example_par-abs.conf'),
-                  os.path.join(DIR_TESTS_CONFIG_SOURCE, 'example.conf.tmpl'): os.path.join(DIR_TESTS_CONIFG, 'example.conf.tmpl')}
-
-    for source, target in sync_files.items():
+    for source in glob.glob(os.path.join(DIR_TESTS_CONFIG_SOURCE, '*')):
+        target = os.path.join(DIR_TESTS_CONIFG, os.path.basename(source))
         print('Copy {} to {} ...'.format(source, target))
         shutil.copy(source, target)
 

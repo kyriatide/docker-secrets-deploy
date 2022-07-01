@@ -1,0 +1,36 @@
+Tests handling of commented variables in configurations.
+
+--------------------------------------------------------------------------------
+
+>>> import sys, pathlib, os
+>>> import run, provider as prvd, descriptor as dscr
+
+# Absolute filepath to ${PWD}/tests/config/example.conf
+# JSON decoding needs four backward slashes
+>>> filepath = os.path.join(pathlib.Path().parent.absolute(), 'tests', 'config', 'example_coms.conf').replace('\\', '\\\\')
+
+>>> os.environ[dscr.EnvironLoader.SOURCE_ENV_VAR] = \
+...     '{"config": "' + filepath + '", "assign": {"pwd": "PASSWORD", "group": "GROUP"}, "assignment_op": "="}'
+>>> os.environ['PASSWORD'] = 'bLupdLr4R2HY'
+>>> os.environ['GROUP'] = 'testgroup'
+
+>>> config = run.deploy(persist_config=False)[0]
+Deploying secrets and variables into example_coms.conf ...
+Found variable(s) during templatization 'pwd, group'.
+Found commented variable(s) during templatization 'group, group, group'.
+Instantiated template keyword(s) 'PASSWORD, GROUP'.
+
+>>> print(config, end='')
+# Config file for testing handling of commented variable assignments
+<BLANKLINE>
+[account]
+user = admin
+pwd  =bLupdLr4R2HY
+description =
+<BLANKLINE>
+[comments]
+# group = 1
+#group=1
+    # group = 1
+group = testgroup
+
