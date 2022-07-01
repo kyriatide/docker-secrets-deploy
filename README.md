@@ -120,7 +120,7 @@ contain any secrets.
 
 ## Entrypoint and Shell Mode Deployment
 
-The script `run.py` can be used as *entrypoint* for docker containers to deploy secrets and values when starting a container using `ENTRYPOINT` and `CMD` directives in the Dockerfile as shownin a section  above. 
+The script `run.py` can be used as *entrypoint* for docker containers to deploy secrets and values when starting a container using `ENTRYPOINT` and `CMD` directives in the Dockerfile as shown above. 
 
 In addition, it can be used in *shell* mode, which means you can also invoke it from the shell, e.g., interactively for testing purposes, or from your own entrypoint scripts if you require. Simply execute `run.py` without passing any command line argument, as in the following example, which sets two environment variables for this execution only.
 

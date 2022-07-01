@@ -110,6 +110,7 @@ class IniFileConfigDeploymentDescriptor(FileConfigDeploymentDescriptor):
     Describes the deployment of secrets/values into an ini configuration file.
     """
     def __init__(self, assignment_op: str = '=', assignment_shell_style: bool = False,
+                 comment_delimiter: str = '#',
                  allow_multi_occurrence: bool = False, **kwargs):
         """
         Validates parameters specific to the configuration type, alongside instantiation via the superclass' constructor.
@@ -126,6 +127,9 @@ class IniFileConfigDeploymentDescriptor(FileConfigDeploymentDescriptor):
         assert isinstance(assignment_shell_style, bool)
         self._assignment_shell_style = assignment_shell_style
 
+        assert isinstance(comment_delimiter, str)
+        self._comment_delimiter = comment_delimiter
+
         assert isinstance(allow_multi_occurrence, bool)
         self._allow_multi_occurrence = allow_multi_occurrence
 
@@ -134,6 +138,9 @@ class IniFileConfigDeploymentDescriptor(FileConfigDeploymentDescriptor):
 
     def assignment_shell_style(self):
         return self._assignment_shell_style
+
+    def comment_delimiter(self):
+        return self._comment_delimiter
 
     def allow_multi_occurrence(self):
         return self._allow_multi_occurrence
