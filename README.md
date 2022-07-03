@@ -108,9 +108,12 @@ Persisting the template file is specified by the parameter `persist` in the depl
 default), e.g., as follows:
 
 ```
-docker run -e ENV_PASSWORD=pass123 \
-           -e DCKR_SCRTS_DEPLOY='{"config": "/config/example.conf", "assign": {"pwd": "ENV_PASSWORD"}, \
-                                  "persist": true}' image
+docker run \
+    -e ENV_PASSWORD=pass123 \
+    -e DCKR_SCRTS_DEPLOY='{"config": "/config/example.conf", \
+                           "assign": {"pwd": "ENV_PASSWORD"}, \
+                           "persist": true}' \
+    image
 ```
 
 Now every time the container is run, the template file is refreshed based on the found actual configuration file, and
@@ -161,9 +164,10 @@ step is skipped and a template which must be available is used right away.
 so if there is no templatization, this attribute must be empty.
 * `persist` (default: `false`): Whether to persist the generated template, or to use it only during deployment.
 
-For ini configuration files:
+For **ini configuration** files:
 * `assignment_op` (default: `=`): Defines the operator used in the config file to assign values to variables.
-* `assignment_shell_style` (default: `false`): Forces assignment of values to variables to follow POSIX shell style syntax, i.e., without whitespace in between the variable name, the assignment operator, and the values, as e.g. in `VARIABLE="value"`. Otherwise, the whitespace contained in the original configuration file is preserved. 
+* `assignment_shell_style` (default: `false`): Forces assignment of values to variables to follow POSIX shell style syntax, i.e., without whitespace in between the variable name, the assignment operator, and the values, as e.g. in `VARIABLE="value"`. Otherwise, the whitespace contained in the original configuration file is preserved.
+* `comment_delimiter` (default: `'#''`): Defines the delimiter marking the start of a line comment. Commented variables are assumed to be intended to have no effect, and are hence detected but ignored by default. Block comments are not supported.
 * `allow_multi_occurrence` (default: `false`): Check every variable occured only once in the configuration. Alleged multiple occurrences usually indicate an error, e.g., caused by a variable name that is not unique.
 
 # Extensibility

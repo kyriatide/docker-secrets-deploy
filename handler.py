@@ -89,9 +89,9 @@ class IniFileConfigHdl(FileConfigHdl):
                         vars_found_commented += [key]
                     break
             template += line
-        print('Found variable(s) during templatization \'{}\'.'.format(', '.join(vars_found_active)))
+        print('Variable(s) found during templatization \'{}\'.'.format(', '.join(vars_found_active)))
         if len(vars_found_commented) > 0:
-            print('Found commented variable(s) during templatization \'{}\'.'.format(', '.join(vars_found_commented)))
+            print('Variable(s) found commented during templatization \'{}\'.'.format(', '.join(vars_found_commented)))
 
         # check all assignments keys are found (at least once) as variables in configuration, either active or commented
         vars_not_found = set(desc.assignments().keys()).difference(set(vars_found_active).union(vars_found_commented))
@@ -107,7 +107,7 @@ class IniFileConfigHdl(FileConfigHdl):
         # check every variable occurred only once as active variable in the configuration, if applicable
         multi_occurrences = [v for v in vars_found_active if vars_found_active.count(v) > 1]
         if not desc.allow_multi_occurrence() and len(multi_occurrences) > 0:
-            raise ValueError('Variable(s) occur multiple times in configuration: {}.'.format(', '.join(multi_occurrences)))
+            raise ValueError('Variable(s) occurred multiple times but not allowed: {}.'.format(', '.join(multi_occurrences)))
 
         return template
 
