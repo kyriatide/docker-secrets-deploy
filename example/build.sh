@@ -4,4 +4,4 @@
 
 scriptdir=$(dirname $(readlink -f $0))
 
-docker build -t docker-secrets-deploy-example $scriptdir $1
+docker build -t kyriatide/docker-secrets-deploy-example $scriptdir $1
